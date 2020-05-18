@@ -1,0 +1,158 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  
+</body>
+<script>
+  // 代理
+  // let newObj（"返回一个新的对象"，其实暴露给用户的就是这个对象，对于target用户是不知道的） = new Proxy(target对象：'被代理的对象'， handler对象：'对代理的对象做什么操作')
+  // handler {
+  //   has // ele in obj 有没有
+  //   get // 获取
+  //   set // 设置
+  //   deleteProperty // 删除
+  //   apply // 用来拦截函数
+  // }
+
+  // Reflet 反射
+
+
+  const obj = {
+    name: 'lmz'
+  }
+  obj.__proto__ = {
+    age: 23
+  }
+  const proxy = new Proxy(obj, {
+    // 目标对象  获取的属性
+    get(target, property) {
+      // return 'aaa'
+      // return target[property]
+      if (property in target) {
+        // for in会去找到原型上的属性  比如这个age
+        return target[property]
+      } else {
+        return new ReferenceError(`{property}不在这个对象上`)
+      }
+    },
+    // 设置这里：三个参数 
+    set(target, property, value) {
+      if (property == 'age') {
+        if (value > 100) {
+          throw new Error('年龄超了')
+        }
+      }
+      // 设置是不需要返回值的
+      target[property] = value
+    },
+    // deleteProperty
+    deleteProperty(target, property) {
+      if (property === 'age') {
+        console.warn('age是不可以删除的')
+      } else {
+        delete target[property]
+      }
+    },
+    has(target, property) {
+      console.log('判断是否调用了has方法')
+      return property in target
+    }
+  })
+  // 注意这里是23 不是99.
+  console.log(proxy.age)
+  // 并没有改引用的属性，只是修改了拦截返回的值
+  proxy.age = 99
+  console.log(proxy.age)
+  // proxy.age = 120  这里就会报错
+  
+  // deletePropert在delete 的时候触发
+  delete proxy.age
+  
+  // has 在in 时候触发
+  console.log('age' in proxy)
+  
+  
+
+
+
+  const Dom = new Proxy({}, {
+    get(target, property) {
+      return (attr = {}, ...children) => {
+        // ---------!!!!!!_-----------!!!------------重点-------------------------------
+        // 这里的property是什么 
+        // 这里的target是什么 {}
+        const el = document.createElement(property)
+        for (let key of Object.keys(attr)) {
+          el.setAttribute(key, attr[key])
+        }
+        for(let child in children) {
+          if (typeof child == 'string') {
+            child = document.createTextNode(child)
+          }
+          el.appendChild(child)
+        }
+      }
+    }
+  })
+  // 这里property 是div，只不过是一个函数
+  let oDiv = Dom.div({id: 'div1', class: 'aaa'}, '我是div1', 'hehehe')
+
+
+
+  // apply用来拦截函数 
+  function fn() {
+    return '我是函数'
+  }
+  const newFn = new Proxy(fn, {
+    apply(target, context, args) {
+      console.log(target, context, args)
+      fn()
+      console.log('fn的基础上装饰点什么呢')
+      return '可以做个装饰器模式'
+    }
+  })
+  // fn 被拦截了
+  console.log(newFn())
+
+  
+// --------------------------------------------Reflet 反射-----------------------------------
+// 三个参数： Reflect.apply(fn, 'abc', [1,2,3,4])
+// fn: 要执行的函数  'abc'是this指向  [1,2,3,4]fn中要传入的参数
+
+// ...arg 剩余参数语法允许我们将一个不定数量的参数表示为一个数组，也就是把参数生成了一个数组
+function show(...args) {
+  console.log(this)
+   // [1, 2, 3, 4]
+  console.log(args)
+}
+show(1,2,3,4)
+show.call('abc', 1,2,3,4)
+show.apply('abc', [1,2,3,4])
+Reflect.apply(show, 'abc', [1,2,3,4])
+
+
+
+// 还可以配合proxy使用
+function sum(a, b) {
+  console.log(this, '------------------', arguments)
+  return a + b
+}
+let newSum = new Proxy(sum, {
+  apply(target, context, args) {
+    // 其实就是把newSum的参数传入到了sum之中
+    return Reflect.apply(...arguments)**2
+  }
+})
+console.log(newSum(2, 3)) // 25
+
+// 通过reflect
+
+</script>
+</html>
+

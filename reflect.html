@@ -1,0 +1,70 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+</body>
+<script>
+  // Reflet 反射
+  // apply用来拦截函数 
+  function fn() {
+    return '我是函数'
+  }
+  const newFn = new Proxy(fn, {
+    apply(target, context, args) {
+      console.log(target, context, args)
+      fn()
+      console.log('fn的基础上装饰点什么呢')
+      return '可以做个装饰器模式'
+    }
+  })
+  // fn 被拦截了
+  console.log(newFn())
+
+// --------------------------------------------Reflet 反射-----------------------------------
+// 三个参数： Reflect.apply(fn, 'abc', [1,2,3,4])
+// fn: 要执行的函数  'abc'是this指向  [1,2,3,4]fn中要传入的参数
+
+// ...arg 剩余参数语法允许我们将一个不定数量的参数表示为一个数组，也就是把参数生成了一个数组
+  function show(...args) {
+    console.log(this)
+     // [1, 2, 3, 4]
+    console.log(args)
+  }
+  show(1,2,3,4)
+  show.call('abc', 1,2,3,4)
+  show.apply('abc', [1,2,3,4])
+  Reflect.apply(show, 'abc', [1,2,3,4])
+
+
+// 还可以配合proxy使用
+  function sum(a, b) {
+    console.log(this, '------------------', arguments)
+    return a + b
+  }
+  let newSum = new Proxy(sum, {
+    apply(target, context, args) {
+      // 其实就是把newSum的参数传入到了sum之中
+      return Reflect.apply(...arguments)**2
+    }
+  })
+  console.log(newSum(2, 3)) // 25
+
+
+// 通过Reflect对象身上直接拿到语言内部的东西
+// Reflect.has  判断是否存在  'assign' in Object  --> Reflect.has(Object, 'assign')
+// Reflect.defineProperty  删除
+  let json = {
+    a: 1,
+    b: 2
+  }
+  Reflect.deleteProperty(json, 'a')
+  console.log(json)
+
+</script>
+</html>
+
