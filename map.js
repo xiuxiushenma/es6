@@ -1,6 +1,6 @@
 // 配合入门专家阮一峰的看看----------------------
-
-// 通常我们写js对象的时候，会发现健都是字符串
+// 1.目前的对象有缺点？
+// 1.1通常我们写js对象的时候，会发现健都是字符串
 let test = {
   name: 'test'
 }
@@ -8,8 +8,8 @@ let test = {
 let obj = {
   1: 'lmz',
   '1': 'yzy',
-  // 这里把test对象当作键，怎么访问呢,其实把对象toString()
-  // 所以传统的对象就有一问题，他做不了键名
+  // 1.2这里把test对象当作键，怎么访问呢,其实把对象toString()
+  //    所以传统的对象就有一问题，他做不了键名
   [test]: 'my name is test'
 }
 
@@ -19,13 +19,13 @@ console.log(obj[test.toString()])
 
 
 
-// map集合
-// 键”的范围不限于字符串，各种类型的值（包括对象）都可以当作键
-// Object 结构提供了“字符串—值”的对应，Map 结构提供了“值—值”的对应，是一种更完善的 Hash 结构实现。
+// 2.map集合解决了什么问题？
+//  2.1键”的范围不限于字符串，各种类型的值（包括对象）都可以当作键
+//  2.2Object结构提供了“字符串—值”的对应，Map 结构提供了“值—值”的对应，是一种更完善的 Hash 结构实现。
 
-// map解决了什么问题？
-// map有哪些常用的方法： set  get  has  delete 
-// 什么类型的数据可以当作Map构造函数的参数？ 数组，set， Map都可以， 具有 Iterator 接口、且每个成员都是一个双元素的数组的数据结构
+
+// 3.map有哪些常用的方法： set  get  has  delete 
+// 4.什么类型的数据可以当作Map构造函数的参数？ 数组，set， Map都可以， 具有 Iterator 接口、且每个成员都是一个双元素的数组的数据结构
 
 const m = new Map();
 const o = {p: 'Hello World'};
@@ -72,38 +72,43 @@ m3.get('baz') // 3
 
 
 
-// 如果get一个未知的键，则返回undefined。-----------------------
-const map = new Map();
-map.set(['a'], 555);
-map.get(['a']) // undefined
+// 5.如果get一个未知的键，则返回undefined。
+const map1 = new Map();
+map1.set(['a'], 555);
+map1.get(['a']) // undefined
+
+
+// 6.Map的键和内存地址的关系？
 // 上面代码的set和get方法，表面是针对同一个键，但实际上这是两个不同的数组实例，内存地址是不一样的，
 // 因此get方法无法读取该键，返回undefined。
 // Map 的键实际上是跟内存地址绑定的，只要内存地址不一样，就视为两个键。这就解决了同名属性碰撞（clash）的问题，
 // 我们扩展别人的库的时候，如果使用对象作为键名，就不用担心自己的属性与原作者的属性同名。
 
 
-
-//如果 Map 的键是一个简单类型的值（数字、字符串、布尔值），则只要两个值严格相等，Map 将其视为一个键，
+// 7.map的键是值怎么相等？
+// 如果 Map 的键是一个简单类型的值（数字、字符串、布尔值），则只要两个值严格相等，Map 将其视为一个键，
 // 比如0和-0就是一个键，
+// 虽然NaN不严格相等于自身，但 Map 将其视为同一个键。
 // 布尔值true和字符串true则是两个不同的键。
 // undefined和null也是两个不同的键。
-// 虽然NaN不严格相等于自身，但 Map 将其视为同一个键。
 
-let map = new Map();
 
-map.set(-0, 123);
-map.get(+0) // 123
 
-map.set(true, 1);
-map.set('true', 2);
-map.get(true) // 1
+let map2 = new Map();
 
-map.set(undefined, 3);
-map.set(null, 4);
-map.get(undefined) // 3
+map2.set(-0, 123);
+map2.get(+0) // 123
 
-map.set(NaN, 123);
-map.get(NaN) // 123
+map2.set(true, 1);
+map2.set('true', 2);
+map2.get(true) // 1
+
+map2.set(undefined, 3);
+map2.set(null, 4);
+map2.get(undefined) // 3
+
+map2.set(NaN, 123);
+map2.get(NaN) // 123
 
 
 // 遍历方法
@@ -143,11 +148,11 @@ const map0 = new Map()
   .set(2, 'b')
   .set(3, 'c');
 
-const map1 = new Map(
+const map3 = new Map(
   [...map0].filter(([k, v]) => k < 3)
 );
 // 产生 Map 结构 {1 => 'a', 2 => 'b'}
-const map2 = new Map(
+const map4 = new Map(
   [...map0].map(([k, v]) => [k * 2, '_' + v])
     );
 // 产生 Map 结构 {2 => '_a', 4 => '_b', 6 => '_c'}
